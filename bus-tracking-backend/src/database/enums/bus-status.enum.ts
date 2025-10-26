@@ -1,0 +1,5 @@
+export enum BusStatus {
+  EN_STATION = 'EN_STATION',
+  EN_ROUTE = 'EN_ROUTE',
+  MAINTENANCE = 'MAINTENANCE',
+}

@@ -1,0 +1,5 @@
+export enum ReportType {
+  PERFORMANCE = 'PERFORMANCE',
+  AFFLUENCE = 'AFFLUENCE',
+  ANOMALIE = 'ANOMALIE',
+}
