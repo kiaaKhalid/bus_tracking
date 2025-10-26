@@ -32,9 +32,9 @@ export function LoginForm() {
 
     try {
       const response = await AuthService.login(data.email, data.password)
-      setToken(response.token)
+      setToken(response.accessToken)
       setUser(response.user)
-      AuthService.setTokenInStorage(response.token)
+      AuthService.setTokenInStorage(response.accessToken)
       router.push("/dashboard")
     } catch (err) {
       let message = "Erreur d'authentification"

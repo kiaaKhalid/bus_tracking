@@ -1,4 +1,4 @@
-import { type AuthResponse, authResponseSchema } from "@/lib/schemas/auth"
+import { type AuthResponse, authResponseSchema, type User } from "@/lib/schemas/auth"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"
 
@@ -26,7 +26,6 @@ export class AuthService {
       const data = await response.json()
 
       if (!response.ok) {
-        // Handle specific error messages from API
         const errorMessage = data.message || data.error || "Erreur d'authentification"
         throw new AuthError(response.status, errorMessage)
       }
@@ -72,6 +71,98 @@ export class AuthService {
     }
   }
 
+  static async sendResetCode(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/send-reset-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || "Erreur lors de l'envoi du code"
+        throw new AuthError(response.status, errorMessage)
+      }
+
+      return data
+    } catch (error) {
+      if (error instanceof AuthError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new AuthError(500, error.message)
+      }
+      throw new AuthError(500, "Erreur lors de l'envoi du code")
+    }
+  }
+
+  static async verifyResetCode(email: string, code: string): Promise<{ valid: boolean }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-reset-code`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || "Code invalide"
+        throw new AuthError(response.status, errorMessage)
+      }
+
+      return data
+    } catch (error) {
+      if (error instanceof AuthError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new AuthError(500, error.message)
+      }
+      throw new AuthError(500, "Erreur lors de la vérification du code")
+    }
+  }
+
+  static async forgetPassword(
+    email: string,
+    code: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Promise<{ success: boolean }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forget-password`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code, newPassword, confirmPassword }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || "Erreur lors de la réinitialisation"
+        throw new AuthError(response.status, errorMessage)
+      }
+
+      return data
+    } catch (error) {
+      if (error instanceof AuthError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new AuthError(500, error.message)
+      }
+      throw new AuthError(500, "Erreur lors de la réinitialisation du mot de passe")
+    }
+  }
+
   static async loginWithGoogle(idToken: string): Promise<AuthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/google`, {
@@ -98,6 +189,64 @@ export class AuthService {
         throw new AuthError(500, error.message)
       }
       throw new AuthError(500, "Erreur d'authentification Google")
+    }
+  }
+
+  static async logout(token: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || "Erreur lors de la déconnexion"
+        throw new AuthError(response.status, errorMessage)
+      }
+
+      return data
+    } catch (error) {
+      if (error instanceof AuthError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new AuthError(500, error.message)
+      }
+      throw new AuthError(500, "Erreur lors de la déconnexion")
+    }
+  }
+
+  static async getCurrentUser(token: string): Promise<User> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        const errorMessage = data.message || data.error || "Erreur lors de la récupération de l'utilisateur"
+        throw new AuthError(response.status, errorMessage)
+      }
+
+      return data
+    } catch (error) {
+      if (error instanceof AuthError) {
+        throw error
+      }
+      if (error instanceof Error) {
+        throw new AuthError(500, error.message)
+      }
+      throw new AuthError(500, "Erreur lors de la récupération de l'utilisateur")
     }
   }
 
@@ -204,7 +353,7 @@ export class AuthService {
     }
   }
 
-  static async refreshToken(token: string): Promise<string> {
+  static async refreshToken(token: string): Promise<AuthResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: "POST",
@@ -219,7 +368,7 @@ export class AuthService {
       }
 
       const data = await response.json()
-      return data.token
+      return authResponseSchema.parse(data)
     } catch (error) {
       throw error instanceof Error ? error : new Error("Token refresh failed")
     }

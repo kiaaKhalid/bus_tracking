@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "@/lib/store"
 import { AuthService } from "@/lib/services/auth-service"
 
-const PUBLIC_ROUTES = ["/login", "/signup", "/forgot-password"]
+const PUBLIC_ROUTES = ["/auth/login", "/auth/signup", "/auth/forgot-password"]
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!isAuth && !isPublicRoute) {
       console.log("[v0] Redirecting to login - not authenticated")
-      router.push("/login")
+      router.push("/")
     } else if (isAuth && PUBLIC_ROUTES.includes(pathname)) {
       console.log("[v0] Redirecting to dashboard - already authenticated")
       router.push("/dashboard")

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "latest",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3-rc.1746560904918",
     "@tanstack/react-table": "latest",
     "@tanstack/react-virtual": "latest",

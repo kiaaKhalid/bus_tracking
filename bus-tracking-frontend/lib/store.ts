@@ -4,6 +4,8 @@ interface User {
   id: string
   email: string
   role: "admin" | "operator" | "viewer"
+  name: string
+  avatar?: string
 }
 
 interface AuthState {
