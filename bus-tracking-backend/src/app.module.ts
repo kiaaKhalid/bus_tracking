@@ -12,6 +12,7 @@ import { Station } from './database/entities/Station.entity';
 import { Report } from './database/entities/Report.entity';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { AppService } from './app.service';
       dropSchema: (process.env.DB_DROP || 'false') === 'true',
       logging: (process.env.DB_LOGGING || 'false') === 'true',
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
